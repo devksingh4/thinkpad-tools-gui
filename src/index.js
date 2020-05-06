@@ -1,12 +1,26 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
 import * as serviceWorker from './serviceWorker';
+import {
+  HashRouter,
+  Route
+} from "react-router-dom";
+
+// Screens
+import Home from './Home';
+import Trackpoint from './Trackpoint';
+import Battery from './Battery';
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <HashRouter>
+      <div>
+        <Route path="/" exact     component={ Home } />
+        <Route path="/trackpoint"     component={ Battery } />
+        <Route path="/battery"     component={ Battery } />
+      </div>
+    </HashRouter>
   </React.StrictMode>,
   document.getElementById('root')
 );
