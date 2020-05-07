@@ -10,8 +10,14 @@ const { exec } = require('child_process');
 let mainWindow;
 
 function createWindow() {
-  mainWindow = new BrowserWindow({width: 900, height: 680});
-  mainWindow.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`);
+  mainWindow = new BrowserWindow({width: 900, height: 680,   webPreferences: {
+    nodeIntegration: true
+  }});
+  if (isDev) {
+    mainWindow.loadURL('http://localhost:3000')
+  } else {
+    mainWindow.loadFile(path.join(__dirname, '../build/index.html'))
+  }
   mainWindow.on('closed', () => mainWindow = null);
 }
 
@@ -55,10 +61,12 @@ ipcMain.on('get-tp-trackpoint-status', (event, arg) => {
   sudo.exec('$(which thinkpad-tools) trackpoint status', {name: "Thinkpad Tools GUI"}, (error, stdout, stderr) => {
       if (error) {
           event.returnValue = {errormsg: error}
+          console.log(stderr)
           throw error
       } else {
           event.returnValue = {sensitivity: parseInt(stdout.match(/\d+/g)[0]), speed: parseInt(stdout.match(/\d+/g)[1])}
       }
+      console.log(event.returnValue)
   }
 );
 })
