@@ -9,10 +9,10 @@ function Home() {
         <Container>
           <h1>Thinkpad Tools (GUI)</h1>
           <p>A GUI wrapper for the thinkpad-tools CLI tool</p>
-          <p>Created by Dev Singh</p>
+          <p>Created by <a href="https://github.com/devksingh4/" target="_blank" rel="noopener noreferrer">Dev Singh</a> (who happens to be looking for internships)</p>
         </Container>
       </Jumbotron>
-      <Bricks props={[{name: "Trackpoint", sudo: true}, {name: "Battery", sudo: false}]}/>
+      <Bricks props={[{name: "Trackpoint", sudo: true}, {name: "Battery", sudo: true}]}/>
     </div>
   );
 }

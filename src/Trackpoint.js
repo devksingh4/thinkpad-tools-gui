@@ -33,6 +33,10 @@ export default class Trackpoint extends Component {
     }
     
   }
+  disableTrackpoint = () => {
+    this.setState({speed: 0, sensitivity: 0})
+    ipcRenderer.sendSync("set-tp-settings", {sensitivity: 0, speed: 0})
+  }
   render() {
     return (
       <div className="Trackpoint">
@@ -49,6 +53,9 @@ export default class Trackpoint extends Component {
         </Form.Group>
         <Button variant="primary" onClick={this.applyChanges}>
           Submit
+        </Button>        
+        <Button variant="danger" onClick={this.disableTrackpoint}>
+          Disable Trackpoint
         </Button>
       </Form>
     </Container>

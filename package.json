@@ -46,6 +46,7 @@
   },
   "build": {
     "appId": "com.example.electron-cra",
+    "target": ["deb", "rpm"],
     "files": [
       "build/**/*",
       "node_modules/**/*"

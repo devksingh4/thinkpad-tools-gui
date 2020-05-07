@@ -1,4 +1,4 @@
-const {app, Notification, BrowserWindow, electron, dialog, ipcMain} = require('electron');
+const {app, shell, Notification, BrowserWindow, electron, dialog, ipcMain} = require('electron');
 const path = require('path');
 const url = require('url');
 const isDev = require('electron-is-dev');
@@ -19,6 +19,10 @@ function createWindow() {
     mainWindow.loadFile(path.join(__dirname, '../build/index.html'))
   }
   mainWindow.on('closed', () => mainWindow = null);
+  mainWindow.webContents.on("new-window", function(event, url) {
+    event.preventDefault();
+    shell.openExternal(url);
+  });
 }
 
 
@@ -52,23 +56,24 @@ app.on('browser-window-created', async () => {
 })
 
 
+
 app.on('ready', createWindow);
 var options = {
   name: 'ThinkpadToolsGUITrackpoint',
 };
 ipcMain.on('get-tp-trackpoint-status', (event, arg) => {
   out = ""
-  sudo.exec('$(which thinkpad-tools) trackpoint status', {name: "Thinkpad Tools GUI"}, (error, stdout, stderr) => {
-      if (error) {
-          event.returnValue = {errormsg: error}
-          console.log(stderr)
-          throw error
-      } else {
-          event.returnValue = {sensitivity: parseInt(stdout.match(/\d+/g)[0]), speed: parseInt(stdout.match(/\d+/g)[1])}
-      }
-      console.log(event.returnValue)
-  }
-);
+    sudo.exec('$(which thinkpad-tools) trackpoint status', {name: "Thinkpad Tools GUI"}, (error, stdout, stderr) => {
+        if (error) {
+            event.returnValue = {errormsg: error}
+            console.log(stderr)
+            throw error
+        } else {
+            event.returnValue = {sensitivity: parseInt(stdout.match(/\d+/g)[0]), speed: parseInt(stdout.match(/\d+/g)[1])}
+        }
+        console.log(event.returnValue)
+    }
+  );
 })
 
 ipcMain.on('set-tp-settings', (event, arg) => {
@@ -93,8 +98,12 @@ ipcMain.on('get-battery-status', (event, arg) => {
   exec('thinkpad-tools battery status', (err, stdout, stderr) => {
       lines = stdout.match(/[^\r\n]+/g)
       vals = []
-      for (i = 0; i < lines.length; i++) {
-          vals[i] = lines[i].split(':')[1].replace(/\s/g, '')
+      try{ 
+        for (i = 0; i < lines.length; i++) {
+            vals[i] = lines[i].split(':')[1].replace(/\s/g, '')
+        }
+      } catch {
+        vals = []
       }
       event.returnValue = vals
   });
@@ -103,11 +112,26 @@ ipcMain.on('get-battery-tags', (event, arg) => {
   exec('thinkpad-tools battery status', (err, stdout, stderr) => {
       lines = stdout.match(/[^\r\n]+/g)
       vals = []
-      for (i = 0; i < lines.length; i++) {
-          vals[i] = lines[i].split(':')[0]
+      try {
+        for (i = 0; i < lines.length; i++) {
+            vals[i] = lines[i].split(':')[0]
+        }
+      } catch {
+        vals =[]
       }
       event.returnValue = vals
   });
+})
+ipcMain.on('set-battery-props', (event, arg) => {
+  sudo.exec('$(which thinkpad-tools) battery set-charge_stop_threshold ' + arg.chargeStop + ' && $(which thinkpad-tools) battery set-charge_start_threshold ' + arg.chargeStart , {name: "Thinkpad Tools GUI"}, (error, stdout, stderr) => {
+    if (error) {
+        event.returnValue = {errormsg: error}
+        throw error
+    } else {
+        event.returnValue = "done"
+    }
+}
+);
 })
 app.on('window-all-closed', () => {
     app.quit();
